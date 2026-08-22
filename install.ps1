@@ -40,7 +40,7 @@ if ($PSVersionTable.PSEdition -ne "Core") {
 if (-not $PSScriptRoot) {
     # IEX code path: $PSScriptRoot is empty, so download the utils from GitHub
     $tmpUtils = Join-Path ([System.IO.Path]::GetTempPath()) "peon-install-utils.ps1"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/PeonPing/peon-ping/main/scripts/install-utils.ps1" -OutFile $tmpUtils -UseBasicParsing
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/lukewang1024/peon-ping/downstream/scripts/install-utils.ps1" -OutFile $tmpUtils -UseBasicParsing
     . $tmpUtils
     Remove-Item $tmpUtils -ErrorAction SilentlyContinue
 } else {
@@ -72,7 +72,7 @@ $ClaudeDir = if ($OpenPeon) { $OpenPeonDir } elseif ($Local) { $LocalClaudeDir }
 $InstallDir = Join-Path $ClaudeDir "hooks\peon-ping"
 $SettingsFile = Join-Path $ClaudeDir "settings.json"
 $RegistryUrl = "https://peonping.github.io/registry/index.json"
-$RepoBase = "https://raw.githubusercontent.com/PeonPing/peon-ping/main"
+$RepoBase = "https://raw.githubusercontent.com/lukewang1024/peon-ping/downstream"
 
 # --- Local config bootstrap ---
 if ($InitLocalConfig) {
@@ -1987,7 +1987,7 @@ if ($Command) {
             $tempScriptsDir = Join-Path $tempDir "scripts"
             New-Item -ItemType Directory -Path $tempScriptsDir -Force | Out-Null
             try {
-                $base = "https://raw.githubusercontent.com/PeonPing/peon-ping/main"
+                $base = "https://raw.githubusercontent.com/lukewang1024/peon-ping/downstream"
                 Invoke-WebRequest -Uri "$base/install.ps1" -OutFile (Join-Path $tempDir "install.ps1") -UseBasicParsing -ErrorAction Stop
                 Invoke-WebRequest -Uri "$base/scripts/install-utils.ps1" -OutFile (Join-Path $tempScriptsDir "install-utils.ps1") -UseBasicParsing -ErrorAction Stop
                 & powershell -NoProfile -File (Join-Path $tempDir "install.ps1")
