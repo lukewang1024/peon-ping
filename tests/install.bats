@@ -109,6 +109,32 @@ teardown() {
   [ -f "$INSTALL_DIR/packs/peon/openpeon.json" ]
 }
 
+@test "install over SSH persists forced remote relay routing" {
+  SSH_CONNECTION="192.0.2.10 50000 192.0.2.20 22" bash "$CLONE_DIR/install.sh"
+  /usr/bin/python3 -c "
+import json
+cfg = json.load(open('$INSTALL_DIR/config.json'))
+assert cfg.get('force_remote_relay') is True
+"
+}
+
+@test "SSH update preserves an explicit forced relay opt-out" {
+  bash "$CLONE_DIR/install.sh"
+  /usr/bin/python3 -c "
+import json
+path = '$INSTALL_DIR/config.json'
+cfg = json.load(open(path))
+cfg['force_remote_relay'] = False
+json.dump(cfg, open(path, 'w'))
+"
+  SSH_CONNECTION="192.0.2.10 50000 192.0.2.20 22" bash "$CLONE_DIR/install.sh"
+  /usr/bin/python3 -c "
+import json
+cfg = json.load(open('$INSTALL_DIR/config.json'))
+assert cfg.get('force_remote_relay') is False
+"
+}
+
 @test "fresh install downloads sound files from registry" {
   bash "$CLONE_DIR/install.sh"
   # Peon pack should have sound files

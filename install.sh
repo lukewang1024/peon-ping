@@ -748,6 +748,25 @@ if not cfg.get('no_rc', False):
 " 2>/dev/null || true
 fi
 
+# --- Persist remote relay routing detected during installation ---
+# Hooks may later run from a long-lived app-server/systemd process that does
+# not inherit SSH_CONNECTION. Remember that this node was installed over SSH
+# so hook-time platform detection does not fall back to local Linux audio.
+# Preserve an explicit user value on subsequent updates.
+if [ "$PLATFORM" = "ssh" ] && [ -f "$INSTALL_DIR/config.json" ]; then
+  python3 -c "
+import json
+path = '$INSTALL_DIR_PY/config.json'
+with open(path) as f:
+    cfg = json.load(f)
+if 'force_remote_relay' not in cfg:
+    cfg['force_remote_relay'] = True
+    with open(path, 'w') as f:
+        json.dump(cfg, f, indent=2)
+        f.write('\\n')
+" 2>/dev/null || true
+fi
+
 # --- Auto-share packs with Claude install (--kimi only) ---
 # When installing for Kimi alongside an existing Claude install, symlink
 # packs/ at Claude's so a single download serves both IDEs. Skipped when:

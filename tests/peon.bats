@@ -2847,6 +2847,24 @@ JSON
 # SSH detection and relay playback
 # ============================================================
 
+@test "persisted force_remote_relay works without SSH environment" {
+  unset PEON_PLATFORM SSH_CONNECTION SSH_CLIENT
+  /usr/bin/python3 -c "
+import json
+path = '$TEST_DIR/config.json'
+cfg = json.load(open(path))
+cfg['force_remote_relay'] = True
+json.dump(cfg, open(path, 'w'))
+"
+  touch "$TEST_DIR/.relay_available"
+  run_peon '{"hook_event_name":"Stop","cwd":"/tmp/myproject","session_id":"forced-relay","permission_mode":"default"}'
+  [ "$PEON_EXIT" -eq 0 ]
+  relay_was_called
+  ! linux_audio_was_called
+  cmdline=$(relay_cmdline)
+  [[ "$cmdline" == *"http://localhost:19998/play?"* ]]
+}
+
 @test "ssh plays sound via relay curl" {
   export PEON_PLATFORM=ssh
   touch "$TEST_DIR/.relay_available"

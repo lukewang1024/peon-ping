@@ -28,7 +28,12 @@ detect_platform() {
     *) echo "unknown" ;;
   esac
 }
-PEON_PLATFORM=${PEON_PLATFORM:-$(detect_platform)}
+if [ -n "${PEON_PLATFORM:-}" ]; then
+  _PEON_PLATFORM_WAS_SET=true
+else
+  _PEON_PLATFORM_WAS_SET=false
+  PEON_PLATFORM=$(detect_platform)
+fi
 
 # Detect if headphones/external audio is connected
 # Returns 0 (true) if headphones detected, 1 (false) if built-in speakers only
@@ -203,6 +208,40 @@ unset _local_config
 # regardless of which project directory the user is in.
 GLOBAL_CONFIG="$PEON_DIR/config.json"
 STATE="$PEON_DIR/.state.json"
+
+# Installation over SSH persists force_remote_relay because hooks are often
+# executed later by a long-lived agent process with no SSH_* environment. The
+# active project config may override the global value; otherwise fall back to
+# the install-level config. An explicit PEON_PLATFORM still wins for tests and
+# one-off operator overrides.
+if [ "$_PEON_PLATFORM_WAS_SET" = false ]; then
+  _force_remote_relay=$(python3 - "$CONFIG" "$GLOBAL_CONFIG" <<'PY' 2>/dev/null || true
+import json
+import os
+import sys
+
+active_path, global_path = sys.argv[1:3]
+value = None
+for path in (active_path, global_path):
+    if not path or not os.path.isfile(path):
+        continue
+    try:
+        with open(path) as f:
+            cfg = json.load(f)
+    except Exception:
+        continue
+    if 'force_remote_relay' in cfg:
+        value = cfg['force_remote_relay']
+        break
+if value is True:
+    print('true')
+PY
+)
+  if [ "$_force_remote_relay" = "true" ]; then
+    PEON_PLATFORM="ssh"
+  fi
+  unset _force_remote_relay
+fi
 
 # MSYS2/MinGW: Windows Python can't read /c/... paths — convert to C:/... via cygpath
 # Also set PYTHONUTF8=1 to avoid cp932/cp1252 codec errors when settings.json contains Unicode

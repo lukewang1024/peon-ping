@@ -356,6 +356,7 @@ peon-ping 有三个独立的控制开关，可以混合使用：
 - 启用手机推送但不显示桌面弹窗：设置 `desktop_notifications: false` 和 `mobile_notify.enabled: true`
 
 - **volume**：0.0–1.0（适合办公室使用的音量）
+- **force_remote_relay**（布尔值，通常不设置）：即使 hook 进程没有 `SSH_CONNECTION`/`SSH_CLIENT` 环境变量，也强制通过 SSH 中继发送音频。通过 SSH 会话安装或升级时，安装程序会自动写入 `true`，但会保留用户已经显式设置的值。适用于脱离 SSH shell 长期运行的 Agent/app-server 进程。
 - **desktop_notifications**：`true`/`false` — 独立于声音控制桌面通知弹窗（默认：`true`）。禁用时，声音继续播放但视觉弹窗被抑制。手机通知不受影响。
 - **notification_style**：`"overlay"` 或 `"standard"` — 控制桌面通知显示方式（默认：`"overlay"`）
   - **overlay**：大型醒目横幅 — macOS 上使用 JXA Cocoa 覆盖，WSL/MSYS2 上使用 Windows Forms 弹窗。点击覆盖层可聚焦终端（支持 Ghostty、Warp、iTerm2、Zed、Terminal.app）。在 iTerm2 上，点击可聚焦到正确的标签页/窗格/窗口。

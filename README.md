@@ -446,6 +446,7 @@ This means you can:
 - Enable mobile push without desktop popups: set `desktop_notifications: false` and `mobile_notify.enabled: true`
 
 - **volume**: 0.0–1.0 (quiet enough for the office)
+- **force_remote_relay** (boolean, normally unset): Force hook audio through the SSH relay even when the hook process has no `SSH_CONNECTION`/`SSH_CLIENT` environment. An install or update performed through SSH writes `true` automatically unless the user already set an explicit value. This covers long-lived agent/app-server processes that outlive the SSH shell.
 - **desktop_notifications**: `true`/`false` — toggle desktop notification popups independently from sounds (default: `true`). When disabled, sounds continue playing but visual popups are suppressed. Mobile notifications are unaffected.
 - **notification_style**: `"overlay"` or `"standard"` — controls how desktop notifications appear (default: `"overlay"`)
   - **overlay**: large, visible banners — JXA Cocoa overlay on macOS, Windows Forms popup on WSL/MSYS2. Clicking the overlay focuses your terminal (supports Ghostty, Warp, iTerm2, Zed, Terminal.app). On iTerm2, clicking focuses the correct tab/pane/window — not just the app.
